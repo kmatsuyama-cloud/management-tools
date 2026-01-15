@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ロボ団 開講クラス（クラウド共有・第3教室対応版）</title>
+    <title>ロボ団 開講クラス（クラウド共有・第3教室対応）</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -50,6 +50,7 @@
         <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-600 mb-4"></div>
         <div class="text-xl font-bold text-slate-700">データを読み込んでいます...</div>
     </div>
+
     <div class="container mx-auto p-4 md:p-8 max-w-screen-2xl">
         <div id="main-sticky-header" class="sticky top-0 z-40 bg-slate-50 pt-4 pb-2">
             <header class="text-center mb-4 relative">
@@ -71,6 +72,7 @@
             </div>
             <div id="schoolTabsContainer" class="border-b-2 border-slate-200 flex items-center gap-2 flex-wrap"></div>
         </div>
+
         <div class="mt-8 bg-white p-6 rounded-2xl shadow-lg">
             <h2 class="text-2xl font-bold text-slate-900 mb-4">クラスサマリー</h2>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 text-center">
@@ -96,6 +98,7 @@
               <div id="courseDashboard" class="space-y-3"></div>
             </div>
         </div>
+
         <div id="mainContent" class="flex flex-col lg:flex-row gap-8 mt-8 lg:items-start">
             <aside id="sidePanel" class="lg:w-1/4 xl:w-1-5 lg:sticky">
                 <div class="bg-white p-6 rounded-2xl shadow-lg space-y-4 lg:overflow-y-auto" id="sidePanelContent">
@@ -131,6 +134,7 @@
             <p class="text-slate-600 mt-2">ここは全校舎の合計データを表示しています。<br>個別のスケジュールを編集するには、上の校舎タブを選択してください。</p>
         </div>
     </div>
+
     <div id="detailModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
         <div id="modalBackdrop" class="absolute inset-0"></div>
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 z-10 mx-4">
@@ -164,6 +168,13 @@
                     <span class="font-semibold text-slate-600">空き枠数</span>
                     <span id="availableSlots" class="col-span-2 font-bold text-xl text-blue-600">0</span>
                 </div>
+                <div class="grid grid-cols-3 items-center pt-4 border-t border-slate-200 mt-4">
+                    <label class="font-semibold text-slate-600">進級タイミング</label>
+                    <div class="col-span-2 flex gap-4">
+                        <label><input type="radio" name="promotionTiming" value="4月"> 4月</label>
+                        <label><input type="radio" name="promotionTiming" value="10月"> 10月</label>
+                    </div>
+                </div>
             </div>
             <div class="mt-8 flex justify-between items-center gap-3">
                 <button id="permanentDeleteBtn" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 font-semibold" style="display: none;">このクラスを完全に削除する</button>
@@ -174,6 +185,7 @@
             </div>
         </div>
     </div>
+    
     <div id="customModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 z-10 mx-4">
             <h2 id="customModalTitle" class="text-2xl font-bold mb-4 text-slate-800"></h2>
@@ -182,18 +194,21 @@
             <div id="customModalButtons" class="flex justify-end gap-3"></div>
         </div>
     </div>
+
     <div id="classroomSelector" class="fixed bottom-6 right-6 z-50 flex flex-col gap-2 items-end">
         <button data-id="all" class="classroom-tab px-4 py-2 font-semibold text-sm bg-white text-slate-700 rounded-full shadow-lg">全ての教室</button>
         <button data-id="classroom1" class="classroom-tab px-4 py-2 font-semibold text-sm bg-white text-slate-700 rounded-full shadow-lg">第1教室</button>
         <button data-id="classroom2" class="classroom-tab px-4 py-2 font-semibold text-sm bg-white text-slate-700 rounded-full shadow-lg">第2教室</button>
         <button data-id="classroom3" class="classroom-tab px-4 py-2 font-semibold text-sm bg-white text-slate-700 rounded-full shadow-lg">第3教室</button>
     </div>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        let db, publicDataRef, unsubscribeSnapshot = null;
+        // 全ての機能を盛り込んだメインスクリプト
+        let db, publicDataRef;
         let isAdmin = false;
         const ADMIN_PASSWORD = "admin";
 
@@ -208,53 +223,18 @@
                 'イノベーター': { duration: 80, style: 'course-innovator', maxSemesters: 2 },
                 'イノベーターNEXT': { duration: 80, style: 'course-innovator-next', maxSemesters: 2 }
             };
-            const promotionMap = { 'キンダー': 'ビギナー', 'ワンダー': 'ビギナー', 'ビギナー': 'チャレンジャー', 'チャレンジャー': 'クリエイター', 'クリエイター': 'イノベーター', 'イノベーター': 'イノベーターNEXT' };
             const days = ['月', '火', '水', '木', '金', '土', '日'];
             const timeRange = { start: 8, end: 21, interval: 10 };
             const semesters = Array.from({length: 5}, (_, i) => i).flatMap(i => {
                 const year = 2025 + i;
                 return [{ id: `${i + 1}-spring`, name: `${year}年 春`}, { id: `${i + 1}-autumn`, name: `${year}年 秋`}];
             });
-            
-            const schoolTabsContainer = document.getElementById('schoolTabsContainer'), schoolNameDisplay = document.getElementById('schoolNameDisplay'), mainContent = document.getElementById('mainContent'), allSchoolsMessage = document.getElementById('allSchoolsMessage'), classBank = document.getElementById('classBank'), promotedBank = document.getElementById('promotedBank'), timetable = document.getElementById('timetable'), semesterSelector = document.getElementById('semesterSelector'), resetBtn = document.getElementById('resetBtn'), detailModal = document.getElementById('detailModal'), modalTitle = document.getElementById('modalTitle'), daySelect = document.getElementById('daySelect'), timeSelect = document.getElementById('timeSelect'), capacityInput = document.getElementById('capacityInput'), studentsInput = document.getElementById('studentsInput'), availableSlots = document.getElementById('availableSlots'), saveBtn = document.getElementById('saveBtn'), closeBtn = document.getElementById('closeBtn'), permanentDeleteBtn = document.getElementById('permanentDeleteBtn'), modalBackdrop = document.getElementById('modalBackdrop'), dashboardContainer = document.getElementById('courseDashboard'), totalStudentsEl = document.getElementById('totalStudents'), totalClassesEl = document.getElementById('totalClasses'), totalAvailableEl = document.getElementById('totalAvailable'), totalFulfillmentEl = document.getElementById('totalFulfillment'), classroomSelector = document.getElementById('classroomSelector'), sidePanel = document.getElementById('sidePanel'), exportPdfBtn = document.getElementById('exportPdfBtn'), loadingOverlay = document.getElementById('loadingOverlay'), adminToggleBtn = document.getElementById('adminToggleBtn'), adminLockIcon = document.getElementById('adminLockIcon'), adminUnlockIcon = document.getElementById('adminUnlockIcon');
-            const customModal = document.getElementById('customModal'), customModalTitle = document.getElementById('customModalTitle'), customModalMessage = document.getElementById('customModalMessage'), customModalInput = document.getElementById('customModalInput'), customModalButtons = document.getElementById('customModalButtons');
 
-            let appData = {}, currentSemesterId = semesters[0].id, currentClassroomId = 'classroom1', editingClassId = null, draggedTabId = null;
+            const schoolTabsContainer = document.getElementById('schoolTabsContainer'), schoolNameDisplay = document.getElementById('schoolNameDisplay'), sidePanel = document.getElementById('sidePanel'), classBank = document.getElementById('classBank'), promotedBank = document.getElementById('promotedBank'), timetable = document.getElementById('timetable'), semesterSelector = document.getElementById('semesterSelector'), detailModal = document.getElementById('detailModal'), daySelect = document.getElementById('daySelect'), timeSelect = document.getElementById('timeSelect'), capacityInput = document.getElementById('capacityInput'), studentsInput = document.getElementById('studentsInput'), availableSlots = document.getElementById('availableSlots'), saveBtn = document.getElementById('saveBtn'), closeBtn = document.getElementById('closeBtn'), classroomSelector = document.getElementById('classroomSelector'), loadingOverlay = document.getElementById('loadingOverlay'), adminToggleBtn = document.getElementById('adminToggleBtn'), adminLockIcon = document.getElementById('adminLockIcon'), adminUnlockIcon = document.getElementById('adminUnlockIcon'), dashboardContainer = document.getElementById('courseDashboard'), totalStudentsEl = document.getElementById('totalStudents'), totalClassesEl = document.getElementById('totalClasses'), totalAvailableEl = document.getElementById('totalAvailable'), totalFulfillmentEl = document.getElementById('totalFulfillment');
 
-            const showCustomModal = (options) => {
-                const { title, message, input = false, confirm = false, initialValue = '' } = options;
-                return new Promise((resolve) => {
-                    customModalTitle.textContent = title; customModalMessage.textContent = message; customModalButtons.innerHTML = '';
-                    if (input) { customModalInput.style.display = 'block'; customModalInput.value = initialValue; } else { customModalInput.style.display = 'none'; }
-                    const createBtn = (text, cls, val) => {
-                        const b = document.createElement('button'); b.textContent = text; b.className = `px-4 py-2 rounded-md font-semibold ${cls}`;
-                        b.onclick = () => { customModal.classList.add('hidden'); resolve(typeof val === 'function' ? val() : val); }; return b;
-                    };
-                    if (confirm || input) {
-                        customModalButtons.appendChild(createBtn('キャンセル', 'bg-slate-200 text-slate-700', confirm ? false : null));
-                        customModalButtons.appendChild(createBtn('OK', 'bg-blue-600 text-white', confirm ? true : () => customModalInput.value));
-                    } else { customModalButtons.appendChild(createBtn('OK', 'bg-blue-600 text-white', true)); }
-                    customModal.classList.remove('hidden'); if (input) customModalInput.focus();
-                });
-            };
+            let appData = {}, currentSemesterId = semesters[0].id, currentClassroomId = 'classroom1', editingClassId = null;
 
-            function getCurrentSchool() { return (appData.schools || []).find(s => s.id === appData.currentSchoolId); }
-            function getClassroomSchedules(crId) { const s = getCurrentSchool(); return s ? s.schedules[crId] : {}; }
-            function getClassroomPromotedClasses(crId) { const s = getCurrentSchool(); return s ? s.promotedClasses[crId] : {}; }
-
-            function updateAdminUI() {
-                document.querySelectorAll('.admin-only').forEach(el => el.classList.toggle('hidden', !isAdmin));
-                renderSchoolTabs();
-            }
-
-            adminToggleBtn.addEventListener('click', async () => {
-                if (isAdmin) { isAdmin = false; adminLockIcon.classList.remove('hidden'); adminUnlockIcon.classList.add('hidden'); updateAdminUI(); }
-                else {
-                    const p = await showCustomModal({title: "管理者認証", message: "パスワードを入力してください", input: true});
-                    if (p === ADMIN_PASSWORD) { isAdmin = true; adminLockIcon.classList.add('hidden'); adminUnlockIcon.classList.remove('hidden'); updateAdminUI(); }
-                }
-            });
-
+            // --- 接続設定 ---
             async function initFirebase() {
                 const config = {
                     apiKey: "AIzaSyCSff4Jp8vHE73i18Tl-eUTLuhGg5vy2jg",
@@ -271,7 +251,13 @@
                 onSnapshot(publicDataRef, (snap) => {
                     if (snap.exists() && snap.data().appData) {
                         appData = snap.data().appData;
-                        if (!appData.schools.find(s => s.id === ALL_SCHOOLS_ID)) appData.schools.unshift({ id: ALL_SCHOOLS_ID, name: 'すべての校舎' });
+                        // 既存の校舎に第3教室の枠がない場合は追加
+                        appData.schools.forEach(s => {
+                            if(s.id !== ALL_SCHOOLS_ID) {
+                                if(!s.schedules.classroom3) s.schedules.classroom3 = {};
+                                if(!s.promotedClasses.classroom3) s.promotedClasses.classroom3 = {};
+                            }
+                        });
                         renderSchoolTabs();
                         switchSchoolTab(appData.currentSchoolId || ALL_SCHOOLS_ID);
                     } else { initializeDefaultData(); renderSchoolTabs(); switchSchoolTab(ALL_SCHOOLS_ID); }
@@ -293,6 +279,10 @@
 
             async function saveData() { if (publicDataRef) await setDoc(publicDataRef, { appData }, { merge: true }); }
 
+            function getCurrentSchool() { return (appData.schools || []).find(s => s.id === appData.currentSchoolId); }
+            function getClassroomSchedules(crId) { const s = getCurrentSchool(); return s ? s.schedules[crId] : {}; }
+
+            // --- 描画・動き ---
             function renderSchoolTabs() {
                 schoolTabsContainer.innerHTML = '';
                 (appData.schools || []).forEach(school => {
@@ -300,35 +290,35 @@
                     tab.className = `school-tab px-4 py-2 text-sm font-medium ${school.id === appData.currentSchoolId ? 'active' : 'text-slate-600'}`;
                     tab.innerHTML = school.id === ALL_SCHOOLS_ID ? `📊 ${school.name}` : (isAdmin ? `${school.name} <span class='school-tab-delete'>×</span>` : school.name);
                     tab.onclick = () => switchSchoolTab(school.id);
-                    if (isAdmin && school.id !== ALL_SCHOOLS_ID) {
-                        tab.draggable = true;
-                        tab.querySelector('.school-tab-delete').onclick = (e) => { e.stopPropagation(); if(confirm('削除しますか？')) { appData.schools = appData.schools.filter(s => s.id !== school.id); saveData(); renderSchoolTabs(); } };
-                    }
                     schoolTabsContainer.appendChild(tab);
                 });
-                if (isAdmin) {
-                    const add = document.createElement('button'); add.className = 'ml-2 px-3 py-1 bg-blue-500 text-white rounded-full text-sm'; add.textContent = '+ 校舎追加';
-                    add.onclick = () => { const n = prompt('校舎名'); if(n) { const id = crypto.randomUUID(); appData.schools.push({id, name: n, schedules: {classroom1:{}, classroom2:{}, classroom3:{}}, promotedClasses: {classroom1:{}, classroom2:{}, classroom3:{}}}); saveData(); renderSchoolTabs(); } };
-                    schoolTabsContainer.appendChild(add);
-                }
             }
 
             function switchSchoolTab(id) {
-                appData.currentSchoolId = id; const s = getCurrentSchool();
-                if (s) schoolNameDisplay.textContent = s.name;
+                appData.currentSchoolId = id;
                 const isAll = id === ALL_SCHOOLS_ID;
+                const s = getCurrentSchool();
+                if (s) schoolNameDisplay.textContent = s.name;
                 sidePanel.style.display = isAll ? 'none' : 'block';
                 document.querySelector('#mainContent main').style.display = isAll ? 'none' : 'block';
-                allSchoolsMessage.style.display = isAll ? 'block' : 'none';
+                document.getElementById('allSchoolsMessage').style.display = isAll ? 'block' : 'none';
                 classroomSelector.style.display = isAll ? 'none' : 'flex';
                 renderSchoolTabs(); switchSemester(currentSemesterId);
             }
 
-            function isSlotOccupied(day, time, dur, crId, exId) {
-                const s = getCurrentSchool(); if (!s) return true;
-                const [h, m] = time.split(':').map(Number), start = h * 60 + m, end = start + dur;
-                const sched = (s.schedules[crId] || {})[currentSemesterId] || [];
-                return sched.some(c => c.id !== exId && c.day === day && (() => { const [hB, mB] = c.time.split(':').map(Number), sB = hB * 60 + mB, eB = sB + courseInfo[c.course].duration; return start < eB && end > sB; })());
+            function switchSemester(id) { currentSemesterId = id; semesterSelector.querySelectorAll('.semester-btn').forEach(b => b.classList.toggle('active', b.dataset.id === id)); loadSchedule(id); }
+
+            function loadSchedule(sId) {
+                timetable.querySelectorAll('.class-item').forEach(el => el.remove());
+                const s = getCurrentSchool(); if (!s) return;
+                const targetRooms = currentClassroomId === 'all' ? ['classroom1', 'classroom2', 'classroom3'] : [currentClassroomId];
+                targetRooms.forEach(rId => {
+                    (s.schedules[rId][sId] || []).forEach(c => {
+                        const slot = timetable.querySelector(`[data-day="${c.day}"][data-time="${c.time}"]`);
+                        if (slot) slot.appendChild(createClassElement(c, currentClassroomId !== 'all'));
+                    });
+                });
+                updateDashboard();
             }
 
             function createClassElement(data, active = true) {
@@ -340,8 +330,7 @@
                 if (active) {
                     el.draggable = true; el.onclick = () => openDetailModal(data.id);
                     el.querySelector('.delete-btn').onclick = (e) => { e.stopPropagation(); const sc = getClassroomSchedules(currentClassroomId)[currentSemesterId]; const idx = sc.findIndex(c => c.id === data.id); if(idx>-1) { sc.splice(idx,1); saveData(); loadSchedule(currentSemesterId); } };
-                    el.ondragstart = (e) => { e.target.classList.add('dragging'); window.draggedItem = e.target; window.dragType = 'move'; };
-                    el.ondragend = (e) => e.target.classList.remove('dragging');
+                    el.ondragstart = (e) => { window.draggedItem = e.target; window.dragType = 'move'; };
                 }
                 return el;
             }
@@ -378,43 +367,12 @@
                 saveData(); loadSchedule(sId);
             }
 
-            function loadSchedule(sId) {
-                timetable.querySelectorAll('.class-item').forEach(el => el.remove());
-                const s = getCurrentSchool(); if (!s) return;
-                const targetRooms = currentClassroomId === 'all' ? ['classroom1', 'classroom2', 'classroom3'] : [currentClassroomId];
-                targetRooms.forEach(rId => {
-                    (s.schedules[rId][sId] || []).forEach(c => {
-                        const slot = timetable.querySelector(`[data-day="${c.day}"][data-time="${c.time}"]`);
-                        if (slot) slot.appendChild(createClassElement(c, currentClassroomId !== 'all'));
-                    });
-                });
-                updateDashboard();
+            function isSlotOccupied(day, time, dur, crId, exId) {
+                const s = getCurrentSchool(); if (!s) return true;
+                const [h, m] = time.split(':').map(Number), start = h * 60 + m, end = start + dur;
+                const sched = (s.schedules[crId] || {})[currentSemesterId] || [];
+                return sched.some(c => c.id !== exId && c.day === day && (() => { const [hB, mB] = c.time.split(':').map(Number), sB = hB * 60 + mB, eB = sB + courseInfo[c.course].duration; return start < eB && end > sB; })());
             }
-
-            function updateDashboard() {
-                const s = getCurrentSchool(); if (!s) return;
-                let all = [];
-                if (appData.currentSchoolId === ALL_SCHOOLS_ID) {
-                    appData.schools.filter(x => x.id !== ALL_SCHOOLS_ID).forEach(sch => { ['classroom1','classroom2','classroom3'].forEach(r => all = all.concat(sch.schedules[r][currentSemesterId] || [])); });
-                } else {
-                    const rooms = currentClassroomId === 'all' ? ['classroom1','classroom2','classroom3'] : [currentClassroomId];
-                    rooms.forEach(r => all = all.concat(s.schedules[r][currentSemesterId] || []));
-                }
-                totalStudentsEl.textContent = all.reduce((a,b) => a + (b.students || 0), 0);
-                totalClassesEl.textContent = all.length;
-                const cap = all.reduce((a,b) => a + (b.capacity || 0), 0);
-                totalAvailableEl.textContent = Math.max(0, cap - parseInt(totalStudentsEl.textContent));
-                dashboardContainer.innerHTML = '';
-                Object.keys(courseInfo).forEach(c => {
-                    const list = all.filter(x => x.course === c);
-                    if (list.length > 0) {
-                        const st = list.reduce((a,b) => a + (b.students || 0), 0), cp = list.reduce((a,b) => a + (b.capacity || 0), 0);
-                        dashboardContainer.insertAdjacentHTML('beforeend', `<div class="grid grid-cols-12 gap-4 items-center text-sm"><div class="col-span-3 font-semibold">${c}</div><div class="col-span-6 bg-slate-200 rounded-full h-4"><div class="${courseInfo[c].style} h-4 rounded-full" style="width:${(st/cp)*100}%"></div></div><div class="col-span-3 text-right">${st}/${cp}人</div></div>`);
-                    }
-                });
-            }
-
-            function switchSemester(id) { currentSemesterId = id; semesterSelector.querySelectorAll('.semester-btn').forEach(b => b.classList.toggle('active', b.dataset.id === id)); loadSchedule(id); }
 
             function openDetailModal(id) {
                 editingClassId = id; const c = getClassroomSchedules(currentClassroomId)[currentSemesterId].find(x => x.id === id);
@@ -441,12 +399,30 @@
                 saveData(); detailModal.classList.add('hidden'); loadSchedule(currentSemesterId);
             };
 
-            closeBtn.onclick = () => detailModal.classList.add('hidden');
-            classroomSelector.querySelectorAll('.classroom-tab').forEach(b => b.onclick = () => {
-                currentClassroomId = b.dataset.id; classroomSelector.querySelectorAll('.classroom-tab').forEach(x => x.classList.toggle('active', x.dataset.id === b.dataset.id)); loadSchedule(currentSemesterId);
-            });
+            function updateDashboard() {
+                const s = getCurrentSchool(); if (!s) return;
+                let all = [];
+                if (appData.currentSchoolId === ALL_SCHOOLS_ID) {
+                    appData.schools.filter(x => x.id !== ALL_SCHOOLS_ID).forEach(sch => { ['classroom1','classroom2','classroom3'].forEach(r => all = all.concat(sch.schedules[r][currentSemesterId] || [])); });
+                } else {
+                    const rooms = currentClassroomId === 'all' ? ['classroom1','classroom2','classroom3'] : [currentClassroomId];
+                    rooms.forEach(r => all = all.concat(s.schedules[r][currentSemesterId] || []));
+                }
+                totalStudentsEl.textContent = all.reduce((a,b) => a + (b.students || 0), 0);
+                totalClassesEl.textContent = all.length;
+                const cap = all.reduce((a,b) => a + (b.capacity || 0), 0);
+                totalAvailableEl.textContent = Math.max(0, cap - parseInt(totalStudentsEl.textContent));
+                dashboardContainer.innerHTML = '';
+                Object.keys(courseInfo).forEach(c => {
+                    const list = all.filter(x => x.course === c);
+                    if (list.length > 0) {
+                        const st = list.reduce((a,b) => a + (b.students || 0), 0), cp = list.reduce((a,b) => a + (b.capacity || 0), 0);
+                        dashboardContainer.insertAdjacentHTML('beforeend', `<div class="grid grid-cols-12 gap-4 items-center text-sm"><div class="col-span-3 font-semibold">${c}</div><div class="col-span-6 bg-slate-200 rounded-full h-4"><div class="${courseInfo[c].style} h-4 rounded-full" style="width:${(st/cp)*100}%"></div></div><div class="col-span-3 text-right">${st}/${cp}人</div></div>`);
+                    }
+                });
+            }
 
-            // 初期設定
+            // 初期化
             semesters.forEach(s => {
                 const b = document.createElement('button'); b.className = 'semester-btn w-full p-2 bg-slate-100 rounded text-xs font-semibold';
                 b.textContent = s.name; b.dataset.id = s.id; b.onclick = () => switchSemester(s.id); semesterSelector.appendChild(b);
@@ -458,7 +434,10 @@
                 el.textContent = c; el.draggable = true; el.dataset.course = c;
                 el.ondragstart = (e) => { window.draggedItem = e.target; window.dragType = 'new'; }; classBank.appendChild(el);
             });
-
+            classroomSelector.querySelectorAll('.classroom-tab').forEach(b => b.onclick = () => {
+                currentClassroomId = b.dataset.id; classroomSelector.querySelectorAll('.classroom-tab').forEach(x => x.classList.toggle('active', x.dataset.id === b.dataset.id)); loadSchedule(currentSemesterId);
+            });
+            closeBtn.onclick = () => detailModal.classList.add('hidden');
             generateTimetableGrid(); initFirebase();
         });
     </script>
