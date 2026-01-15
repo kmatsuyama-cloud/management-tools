@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ロボ団 開講クラス（クラウド共有・第3教室対応）</title>
+    <title>ロボ団 開講クラス（クラウド共有・第3教室完全対応版）</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -22,26 +22,19 @@
         .hour-separator { border-top: 1px solid #cbd5e1; }
         .dragging { opacity: 0.5; }
         .drag-over { background-color: #3b82f620; border: 2px dashed #3b82f6; }
-        .class-item { transition: all 0.2s; position: absolute; cursor: pointer; }
+        .class-item { transition: all 0.2s; position: absolute; cursor: pointer; z-index: 10; width: 100%; }
         .class-item-inactive { opacity: 0.4; pointer-events: none; z-index: 5; }
-        .class-item-in-bank { cursor: grab; }
-        .class-item-in-bank:active { cursor: grabbing; }
         .delete-btn { display: none; position: absolute; top: 2px; right: 2px; width: 16px; height: 16px; background-color: rgba(0,0,0,0.4); color: white; border-radius: 50%; text-align: center; line-height: 14px; font-size: 12px; cursor: pointer; z-index: 20; }
         .class-item:hover .delete-btn { display: block; }
         .promotion-badge { position: absolute; top: -8px; left: -8px; width: 20px; height: 20px; background-color: #fbbf24; color: #78350f; border: 1px solid #f59e0b; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; box-shadow: 0 1px 3px rgba(0,0,0,0.2); z-index: 20; }
-        .semester-btn.active { background-color: #3b82f6; color: white; }
-        .classroom-tab.active { background-color: #3b82f6; color: white; }
-        #promotedBank .class-item-in-bank { background-color: #eff6ff; }
         .timing-indicator { width: 18px; height: 18px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 10px; font-weight: bold; color: white; }
         .timing-april { background-color: #ec4899; }
         .timing-october { background-color: #818cf8; }
+        .semester-btn.active, .classroom-tab.active { background-color: #3b82f6; color: white; }
         .school-tab { transition: all 0.2s; border-bottom: 3px solid transparent; }
         .school-tab.active { border-bottom-color: #3b82f6; color: #3b82f6; font-weight: 600; }
-        .school-tab-delete { display: none; margin-left: 8px; font-size: 14px; color: #ef4444; opacity: 0.6; transition: opacity 0.2s; }
+        .school-tab-delete { display: none; margin-left: 8px; color: #ef4444; opacity: 0.6; }
         .school-tab:hover .school-tab-delete { display: inline; }
-        .school-tab-delete:hover { opacity: 1; }
-        .tab-drag-over { border-left: 3px solid #3b82f6; background-color: #eff6ff; }
-        button:disabled { opacity: 0.5; cursor: not-allowed; }
         #loadingOverlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(255,255,255,0.9); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
     </style>
 </head>
@@ -50,156 +43,54 @@
         <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-600 mb-4"></div>
         <div class="text-xl font-bold text-slate-700">データを読み込んでいます...</div>
     </div>
-
     <div class="container mx-auto p-4 md:p-8 max-w-screen-2xl">
         <div id="main-sticky-header" class="sticky top-0 z-40 bg-slate-50 pt-4 pb-2">
             <header class="text-center mb-4 relative">
-                <h1 class="text-3xl md:text-4xl font-bold text-slate-900 flex items-center justify-center gap-2 flex-wrap">
-                    ロボ団「<span id="schoolNameDisplay" class="text-blue-600"></span>」開講クラス
-                </h1>
-                <button id="adminToggleBtn" class="absolute right-0 top-1 text-slate-400 hover:text-slate-600 p-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" id="adminLockIcon">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                    </svg>
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 hidden text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" id="adminUnlockIcon">
-                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z" />
-                    </svg>
+                <h1 class="text-3xl md:text-4xl font-bold text-slate-900">ロボ団「<span id="schoolNameDisplay" class="text-blue-600"></span>」開講クラス</h1>
+                <button id="adminToggleBtn" class="absolute right-0 top-1 text-slate-400 p-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" id="adminLockIcon"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 hidden text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" id="adminUnlockIcon"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z" /></svg>
                 </button>
             </header>
-            <div class="mb-4">
-                <h3 class="text-sm font-bold text-slate-600 mb-2">学期</h3>
-                <div id="semesterSelector" class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-10 gap-2"></div>
-            </div>
+            <div class="mb-4"><h3 class="text-sm font-bold text-slate-600 mb-2">学期</h3><div id="semesterSelector" class="grid grid-cols-2 sm:grid-cols-5 lg:grid-cols-10 gap-2"></div></div>
             <div id="schoolTabsContainer" class="border-b-2 border-slate-200 flex items-center gap-2 flex-wrap"></div>
         </div>
-
-        <div class="mt-8 bg-white p-6 rounded-2xl shadow-lg">
-            <h2 class="text-2xl font-bold text-slate-900 mb-4">クラスサマリー</h2>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 text-center">
-                <div class="bg-blue-50 p-4 rounded-lg">
-                    <div class="text-sm font-semibold text-blue-800">総生徒数</div>
-                    <div id="totalStudents" class="text-3xl font-bold text-blue-600">0</div>
-                </div>
-                <div class="bg-green-50 p-4 rounded-lg">
-                    <div class="text-sm font-semibold text-green-800">総クラス数</div>
-                    <div id="totalClasses" class="text-3xl font-bold text-green-600">0</div>
-                </div>
-                <div class="bg-orange-50 p-4 rounded-lg">
-                    <div class="text-sm font-semibold text-orange-800">総空き枠数</div>
-                    <div id="totalAvailable" class="text-3xl font-bold text-orange-600">0</div>
-                </div>
-            </div>
-            <div class="border-t border-slate-200 pt-4 mb-6">
-                <h3 class="text-lg font-bold text-slate-800 mb-3">全クラス充足率</h3>
-                <div id="totalFulfillment"></div>
-            </div>
-            <div class="border-t border-slate-200 pt-4">
-              <h3 class="text-lg font-bold text-slate-800 mb-3">コース別状況</h3>
-              <div id="courseDashboard" class="space-y-3"></div>
-            </div>
-        </div>
-
         <div id="mainContent" class="flex flex-col lg:flex-row gap-8 mt-8 lg:items-start">
             <aside id="sidePanel" class="lg:w-1/4 xl:w-1-5 lg:sticky">
-                <div class="bg-white p-6 rounded-2xl shadow-lg space-y-4 lg:overflow-y-auto" id="sidePanelContent">
-                    <div id="promotedSection">
-                        <h3 class="text-lg font-bold mb-3 text-blue-700 border-b pb-2">持ち越しクラス</h3>
-                        <div id="promotedBank" class="space-y-3 min-h-[50px]"></div>
-                    </div>
-                    <div>
-                        <h3 class="text-lg font-bold mb-3 border-b pb-2">新規クラス</h3>
-                        <div id="classBank" class="space-y-3"></div>
-                    </div>
-                    <div>
-                        <h2 class="text-xl font-bold mt-4 mb-2">データ管理</h2>
-                        <div class="space-y-2 text-xs">
-                            <div class="p-2 bg-yellow-50 text-yellow-800 rounded mb-2 border border-yellow-200">☁️ クラウド同期中</div>
-                            <div class="grid grid-cols-2 gap-2 admin-only hidden">
-                                <button id="exportSchoolBtn" class="w-full px-3 py-2 bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200">校舎JSON保存</button>
-                                <button id="importSchoolBtn" class="w-full px-3 py-2 bg-green-100 text-green-700 rounded-md hover:bg-green-200">校舎JSON復元</button>
-                            </div>
-                            <button id="exportPdfBtn" class="w-full mt-2 px-3 py-2 bg-indigo-100 text-indigo-700 rounded-md hover:bg-indigo-200">PDFでエクスポート</button>
-                        </div>
-                    </div>
+                <div class="bg-white p-6 rounded-2xl shadow-lg space-y-4">
+                    <div id="promotedSection"><h3 class="text-lg font-bold mb-3 text-blue-700 border-b pb-2">持ち越しクラス</h3><div id="promotedBank" class="space-y-3 min-h-[50px]"></div></div>
+                    <div><h3 class="text-lg font-bold mb-3 border-b pb-2">新規クラス</h3><div id="classBank" class="space-y-3"></div></div>
+                    <button id="exportPdfBtn" class="w-full mt-2 px-3 py-2 bg-indigo-100 text-indigo-700 rounded-md">PDF保存</button>
                 </div>
             </aside>
-            <main class="flex-1">
-                <div id="timetable-container" class="bg-white rounded-2xl shadow-lg">
-                    <div id="timetable" class="grid relative min-w-[1000px]"></div>
-                </div>
-            </main>
-        </div>
-         <div id="allSchoolsMessage" class="hidden text-center p-8 bg-white rounded-2xl shadow-lg">
-            <h2 class="text-xl font-bold text-slate-800">全校舎のサマリー</h2>
-            <p class="text-slate-600 mt-2">ここは全校舎の合計データを表示しています。<br>個別のスケジュールを編集するには、上の校舎タブを選択してください。</p>
+            <main class="flex-1"><div id="timetable-container" class="bg-white rounded-2xl shadow-lg overflow-x-auto"><div id="timetable" class="grid relative min-w-[1000px]"></div></div></main>
         </div>
     </div>
 
     <div id="detailModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-        <div id="modalBackdrop" class="absolute inset-0"></div>
-        <div class="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 z-10 mx-4">
-            <h2 id="modalTitle" class="text-2xl font-bold mb-6 text-slate-800">クラス詳細設定</h2>
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 mx-4">
+            <h2 id="modalTitle" class="text-2xl font-bold mb-6">クラス詳細設定</h2>
             <div class="space-y-4">
-                <div class="grid grid-cols-3 items-center">
-                    <label class="font-semibold text-slate-600">曜日</label>
-                    <select id="daySelect" class="col-span-2 p-2 border border-slate-300 rounded-md"></select>
-                </div>
-                <div class="grid grid-cols-3 items-center">
-                    <label class="font-semibold text-slate-600">開始時間</label>
-                    <select id="timeSelect" class="col-span-2 p-2 border border-slate-300 rounded-md"></select>
-                </div>
-                 <div class="grid grid-cols-3 items-center">
-                    <label class="font-semibold text-slate-600">教室</label>
-                    <div class="col-span-2 flex flex-wrap gap-2">
+                <div class="grid grid-cols-3 items-center"><label>曜日</label><select id="daySelect" class="col-span-2 p-2 border rounded"></select></div>
+                <div class="grid grid-cols-3 items-center"><label>時間</label><select id="timeSelect" class="col-span-2 p-2 border rounded"></select></div>
+                <div class="grid grid-cols-3 items-center"><label>教室</label>
+                    <div class="col-span-2 flex gap-2">
                         <label><input type="radio" name="classroom" value="classroom1"> 第1</label>
                         <label><input type="radio" name="classroom" value="classroom2"> 第2</label>
                         <label><input type="radio" name="classroom" value="classroom3"> 第3</label>
                     </div>
                 </div>
-                <div class="grid grid-cols-3 items-center">
-                    <label class="font-semibold text-slate-600">枠人数</label>
-                    <input type="number" id="capacityInput" class="col-span-2 p-2 border border-slate-300 rounded-md">
-                </div>
-                <div class="grid grid-cols-3 items-center">
-                    <label class="font-semibold text-slate-600">現在の人数</label>
-                    <input type="number" id="studentsInput" class="col-span-2 p-2 border border-slate-300 rounded-md">
-                </div>
-                <div class="grid grid-cols-3 items-center">
-                    <span class="font-semibold text-slate-600">空き枠数</span>
-                    <span id="availableSlots" class="col-span-2 font-bold text-xl text-blue-600">0</span>
-                </div>
-                <div class="grid grid-cols-3 items-center pt-4 border-t border-slate-200 mt-4">
-                    <label class="font-semibold text-slate-600">進級タイミング</label>
-                    <div class="col-span-2 flex gap-4">
-                        <label><input type="radio" name="promotionTiming" value="4月"> 4月</label>
-                        <label><input type="radio" name="promotionTiming" value="10月"> 10月</label>
-                    </div>
-                </div>
+                <div class="grid grid-cols-3 items-center"><label>人数</label><input type="number" id="capacityInput" class="col-span-2 p-2 border rounded"></div>
             </div>
-            <div class="mt-8 flex justify-between items-center gap-3">
-                <button id="permanentDeleteBtn" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 font-semibold" style="display: none;">このクラスを完全に削除する</button>
-                <div class="flex justify-end gap-3 ml-auto">
-                    <button id="closeBtn" class="px-4 py-2 bg-slate-200 text-slate-700 rounded-md">閉じる</button>
-                    <button id="saveBtn" class="px-4 py-2 bg-blue-600 text-white rounded-md">保存する</button>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <div id="customModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-        <div class="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 z-10 mx-4">
-            <h2 id="customModalTitle" class="text-2xl font-bold mb-4 text-slate-800"></h2>
-            <p id="customModalMessage" class="text-slate-600 mb-6"></p>
-            <input type="text" id="customModalInput" class="w-full p-2 border border-slate-300 rounded-md mb-6 hidden">
-            <div id="customModalButtons" class="flex justify-end gap-3"></div>
+            <div class="mt-8 flex justify-end gap-3"><button id="closeBtn" class="px-4 py-2 bg-slate-200 rounded">閉じる</button><button id="saveBtn" class="px-4 py-2 bg-blue-600 text-white rounded">保存</button></div>
         </div>
     </div>
 
     <div id="classroomSelector" class="fixed bottom-6 right-6 z-50 flex flex-col gap-2 items-end">
-        <button data-id="all" class="classroom-tab px-4 py-2 font-semibold text-sm bg-white text-slate-700 rounded-full shadow-lg">全ての教室</button>
-        <button data-id="classroom1" class="classroom-tab px-4 py-2 font-semibold text-sm bg-white text-slate-700 rounded-full shadow-lg">第1教室</button>
-        <button data-id="classroom2" class="classroom-tab px-4 py-2 font-semibold text-sm bg-white text-slate-700 rounded-full shadow-lg">第2教室</button>
-        <button data-id="classroom3" class="classroom-tab px-4 py-2 font-semibold text-sm bg-white text-slate-700 rounded-full shadow-lg">第3教室</button>
+        <button data-id="all" class="classroom-tab px-4 py-2 bg-white rounded-full shadow-lg">全ての教室</button>
+        <button data-id="classroom1" class="classroom-tab px-4 py-2 bg-white rounded-full shadow-lg">第1教室</button>
+        <button data-id="classroom2" class="classroom-tab px-4 py-2 bg-white rounded-full shadow-lg">第2教室</button>
+        <button data-id="classroom3" class="classroom-tab px-4 py-2 bg-white rounded-full shadow-lg">第3教室</button>
     </div>
 
     <script type="module">
@@ -207,239 +98,136 @@
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // 全ての機能を盛り込んだメインスクリプト
-        let db, publicDataRef;
-        let isAdmin = false;
-        const ADMIN_PASSWORD = "admin";
+        let db, publicDataRef, appData = {}, isAdmin = false;
+        const ADMIN_PASSWORD = "admin", days = ['月', '火', '水', '木', '金', '土', '日'];
+        const courseInfo = { 'キンダー': { duration: 50, style: 'course-kinder' }, 'ワンダー': { duration: 50, style: 'course-wonder' }, 'ビギナー': { duration: 50, style: 'course-beginner' }, 'チャレンジャー': { duration: 80, style: 'course-challenger' }, 'クリエイター': { duration: 80, style: 'course-creator' }, 'イノベーター': { duration: 80, style: 'course-innovator' }, 'イノベーターNEXT': { duration: 80, style: 'course-innovator-next' } };
+        const semesters = Array.from({length: 5}, (_, i) => 2025 + i).flatMap(y => [{id:`${y-2024}-spring`, name:`${y}年 春`}, {id:`${y-2024}-autumn`, name:`${y}年 秋`}]);
+        let currentSemesterId = semesters[0].id, currentClassroomId = 'classroom1', editingClassId = null;
 
-        document.addEventListener('DOMContentLoaded', async () => {
-            const ALL_SCHOOLS_ID = 'all-schools-dashboard';
-            const courseInfo = {
-                'キンダー': { duration: 50, style: 'course-kinder', maxSemesters: 1 },
-                'ワンダー': { duration: 50, style: 'course-wonder', maxSemesters: 1 },
-                'ビギナー': { duration: 50, style: 'course-beginner', maxSemesters: 2 },
-                'チャレンジャー': { duration: 80, style: 'course-challenger', maxSemesters: 2 },
-                'クリエイター': { duration: 80, style: 'course-creator', maxSemesters: 2 },
-                'イノベーター': { duration: 80, style: 'course-innovator', maxSemesters: 2 },
-                'イノベーターNEXT': { duration: 80, style: 'course-innovator-next', maxSemesters: 2 }
-            };
-            const days = ['月', '火', '水', '木', '金', '土', '日'];
-            const timeRange = { start: 8, end: 21, interval: 10 };
-            const semesters = Array.from({length: 5}, (_, i) => i).flatMap(i => {
-                const year = 2025 + i;
-                return [{ id: `${i + 1}-spring`, name: `${year}年 春`}, { id: `${i + 1}-autumn`, name: `${year}年 秋`}];
+        const schoolTabsContainer = document.getElementById('schoolTabsContainer'), timetable = document.getElementById('timetable'), classroomSelector = document.getElementById('classroomSelector');
+
+        async function initFirebase() {
+            const config = { apiKey: "AIzaSyCSff4Jp8vHE73i18Tl-eUTLuhGg5vy2jg", authDomain: "management-tools-19739.firebaseapp.com", projectId: "management-tools-19739", storageBucket: "management-tools-19739.firebasestorage.app", messagingSenderId: "868459021342", appId: "1:868459021342:web:b1fdc30ce84dae27465a0f" };
+            const app = initializeApp(config); db = getFirestore(app); await signInAnonymously(getAuth(app));
+            publicDataRef = doc(db, 'artifacts', 'robodan-shared-v1', 'public', 'data', 'robodan_app_data', 'shared_schedule');
+            onSnapshot(publicDataRef, (snap) => {
+                if (snap.exists() && snap.data().appData) {
+                    appData = snap.data().appData;
+                    appData.schools.forEach(s => { if(s.id !== 'all-schools-dashboard') { ['classroom1','classroom2','classroom3'].forEach(c => { if(!s.schedules[c]) s.schedules[c] = {}; if(!s.promotedClasses[c]) s.promotedClasses[c] = {}; }); } });
+                    renderSchoolTabs(); switchSchoolTab(appData.currentSchoolId || 'all-schools-dashboard');
+                } else { initializeDefaultData(); }
+                document.getElementById('loadingOverlay').style.display = 'none';
             });
+        }
 
-            const schoolTabsContainer = document.getElementById('schoolTabsContainer'), schoolNameDisplay = document.getElementById('schoolNameDisplay'), sidePanel = document.getElementById('sidePanel'), classBank = document.getElementById('classBank'), promotedBank = document.getElementById('promotedBank'), timetable = document.getElementById('timetable'), semesterSelector = document.getElementById('semesterSelector'), detailModal = document.getElementById('detailModal'), daySelect = document.getElementById('daySelect'), timeSelect = document.getElementById('timeSelect'), capacityInput = document.getElementById('capacityInput'), studentsInput = document.getElementById('studentsInput'), availableSlots = document.getElementById('availableSlots'), saveBtn = document.getElementById('saveBtn'), closeBtn = document.getElementById('closeBtn'), classroomSelector = document.getElementById('classroomSelector'), loadingOverlay = document.getElementById('loadingOverlay'), adminToggleBtn = document.getElementById('adminToggleBtn'), adminLockIcon = document.getElementById('adminLockIcon'), adminUnlockIcon = document.getElementById('adminUnlockIcon'), dashboardContainer = document.getElementById('courseDashboard'), totalStudentsEl = document.getElementById('totalStudents'), totalClassesEl = document.getElementById('totalClasses'), totalAvailableEl = document.getElementById('totalAvailable'), totalFulfillmentEl = document.getElementById('totalFulfillment');
+        function initializeDefaultData() {
+            const id = crypto.randomUUID();
+            appData = { schools: [{ id: 'all-schools-dashboard', name: 'すべての校舎' }, { id: id, name: '最初の校舎', schedules: { classroom1: {}, classroom2: {}, classroom3: {} }, promotedClasses: { classroom1: {}, classroom2: {}, classroom3: {} } }], currentSchoolId: 'all-schools-dashboard' };
+            ['classroom1', 'classroom2', 'classroom3'].forEach(cr => { appData.schools[1].schedules[cr][currentSemesterId] = []; appData.schools[1].promotedClasses[cr][currentSemesterId] = []; });
+            saveData();
+        }
 
-            let appData = {}, currentSemesterId = semesters[0].id, currentClassroomId = 'classroom1', editingClassId = null;
+        async function saveData() { if (publicDataRef) await setDoc(publicDataRef, { appData }, { merge: true }); }
 
-            // --- 接続設定 ---
-            async function initFirebase() {
-                const config = {
-                    apiKey: "AIzaSyCSff4Jp8vHE73i18Tl-eUTLuhGg5vy2jg",
-                    authDomain: "management-tools-19739.firebaseapp.com",
-                    projectId: "management-tools-19739",
-                    storageBucket: "management-tools-19739.firebasestorage.app",
-                    messagingSenderId: "868459021342",
-                    appId: "1:868459021342:web:b1fdc30ce84dae27465a0f"
-                };
-                const app = initializeApp(config);
-                db = getFirestore(app);
-                await signInAnonymously(getAuth(app));
-                publicDataRef = doc(db, 'artifacts', 'robodan-shared-v1', 'public', 'data', 'robodan_app_data', 'shared_schedule');
-                onSnapshot(publicDataRef, (snap) => {
-                    if (snap.exists() && snap.data().appData) {
-                        appData = snap.data().appData;
-                        // 既存の校舎に第3教室の枠がない場合は追加
-                        appData.schools.forEach(s => {
-                            if(s.id !== ALL_SCHOOLS_ID) {
-                                if(!s.schedules.classroom3) s.schedules.classroom3 = {};
-                                if(!s.promotedClasses.classroom3) s.promotedClasses.classroom3 = {};
-                            }
-                        });
-                        renderSchoolTabs();
-                        switchSchoolTab(appData.currentSchoolId || ALL_SCHOOLS_ID);
-                    } else { initializeDefaultData(); renderSchoolTabs(); switchSchoolTab(ALL_SCHOOLS_ID); }
-                    loadingOverlay.style.display = 'none';
+        function renderSchoolTabs() {
+            schoolTabsContainer.innerHTML = '';
+            appData.schools.forEach(s => {
+                const tab = document.createElement('button'); tab.className = `school-tab px-4 py-2 text-sm font-medium ${s.id === appData.currentSchoolId ? 'active' : 'text-slate-600'}`;
+                tab.innerHTML = s.id === 'all-schools-dashboard' ? `📊 ${s.name}` : (isAdmin ? `${s.name} <span class='school-tab-delete'>×</span>` : s.name);
+                tab.onclick = () => switchSchoolTab(s.id); schoolTabsContainer.appendChild(tab);
+            });
+        }
+
+        function switchSchoolTab(id) { appData.currentSchoolId = id; document.getElementById('schoolNameDisplay').textContent = (appData.schools.find(x=>x.id===id)||{}).name; renderSchoolTabs(); switchSemester(currentSemesterId); }
+        function switchSemester(id) { currentSemesterId = id; document.querySelectorAll('.semester-btn').forEach(b => b.classList.toggle('active', b.dataset.id === id)); loadSchedule(); }
+
+        function loadSchedule() {
+            timetable.querySelectorAll('.class-item').forEach(el => el.remove());
+            const s = appData.schools.find(x => x.id === appData.currentSchoolId); if (!s || s.id === 'all-schools-dashboard') return;
+            const rooms = currentClassroomId === 'all' ? ['classroom1', 'classroom2', 'classroom3'] : ['classroom1', 'classroom2', 'classroom3'];
+            rooms.forEach(rId => {
+                const isActive = (currentClassroomId === 'all' || currentClassroomId === rId);
+                (s.schedules[rId][currentSemesterId] || []).forEach(c => {
+                    const slot = timetable.querySelector(`[data-day="${c.day}"][data-time="${c.time}"]`);
+                    if (slot) { const el = createClassElement(c, isActive); el.dataset.classroomId = rId; slot.appendChild(el); }
                 });
+            });
+            adjustOverlaps();
+        }
+
+        function createClassElement(data, active) {
+            const info = courseInfo[data.course], el = document.createElement('div');
+            el.className = `class-item p-2 rounded-lg border-l-4 text-xs ${info.style} flex flex-col justify-between ${!active ? 'class-item-inactive' : ''}`;
+            el.style.height = `${(info.duration / 10) * 20}px`; el.dataset.id = data.id; el.dataset.course = data.course;
+            el.innerHTML = `<div><div class='font-bold'>${data.course}</div></div><div class='flex justify-between items-center'><div>(${data.students||0}/${data.capacity||8})</div></div>${active?'<div class="delete-btn">×</div>':''}`;
+            if (active) { el.draggable = true; el.onclick = () => openDetailModal(data.id); el.ondragstart = (e) => { window.draggedItem = e.target; window.dragType = 'move'; }; }
+            return el;
+        }
+
+        function adjustOverlaps() {
+            const items = Array.from(timetable.querySelectorAll('.class-item'));
+            items.forEach(i => { i.style.width = '100%'; i.style.left = '0%'; });
+            if (currentClassroomId !== 'all') return;
+            // 簡易的な3分割ロジック
+            const rooms = {'classroom1': '0%', 'classroom2': '33.3%', 'classroom3': '66.6%'};
+            items.forEach(i => { i.style.width = '33.3%'; i.style.left = rooms[i.dataset.classroomId]; });
+        }
+
+        function handleDrop(e) {
+            e.preventDefault(); const slot = e.currentTarget; slot.classList.remove('drag-over');
+            if (!window.draggedItem || currentClassroomId === 'all') return;
+            const s = appData.schools.find(x => x.id === appData.currentSchoolId);
+            const course = window.draggedItem.dataset.course;
+            if (window.dragType === 'move') {
+                const c = s.schedules[window.draggedItem.parentElement.dataset.classroomId || currentClassroomId][currentSemesterId].find(x => x.id === window.draggedItem.dataset.id);
+                if (c) { c.day = slot.dataset.day; c.time = slot.dataset.time; }
+            } else {
+                s.schedules[currentClassroomId][currentSemesterId].push({ id: crypto.randomUUID(), course, day: slot.dataset.day, time: slot.dataset.time, capacity: 8, students: 0, promotionTiming: '4月', classroomId: currentClassroomId });
             }
+            saveData(); loadSchedule();
+        }
 
-            function initializeDefaultData() {
-                const id = crypto.randomUUID();
-                appData = {
-                    schools: [{ id: ALL_SCHOOLS_ID, name: 'すべての校舎' }, { id: id, name: '最初の校舎', schedules: { classroom1: {}, classroom2: {}, classroom3: {} }, promotedClasses: { classroom1: {}, classroom2: {}, classroom3: {} } }],
-                    currentSchoolId: ALL_SCHOOLS_ID
-                };
-                ['classroom1', 'classroom2', 'classroom3'].forEach(cr => {
-                    appData.schools[1].schedules[cr][semesters[0].id] = [];
-                    appData.schools[1].promotedClasses[cr][semesters[0].id] = [];
-                });
-            }
-
-            async function saveData() { if (publicDataRef) await setDoc(publicDataRef, { appData }, { merge: true }); }
-
-            function getCurrentSchool() { return (appData.schools || []).find(s => s.id === appData.currentSchoolId); }
-            function getClassroomSchedules(crId) { const s = getCurrentSchool(); return s ? s.schedules[crId] : {}; }
-
-            // --- 描画・動き ---
-            function renderSchoolTabs() {
-                schoolTabsContainer.innerHTML = '';
-                (appData.schools || []).forEach(school => {
-                    const tab = document.createElement('button');
-                    tab.className = `school-tab px-4 py-2 text-sm font-medium ${school.id === appData.currentSchoolId ? 'active' : 'text-slate-600'}`;
-                    tab.innerHTML = school.id === ALL_SCHOOLS_ID ? `📊 ${school.name}` : (isAdmin ? `${school.name} <span class='school-tab-delete'>×</span>` : school.name);
-                    tab.onclick = () => switchSchoolTab(school.id);
-                    schoolTabsContainer.appendChild(tab);
-                });
-            }
-
-            function switchSchoolTab(id) {
-                appData.currentSchoolId = id;
-                const isAll = id === ALL_SCHOOLS_ID;
-                const s = getCurrentSchool();
-                if (s) schoolNameDisplay.textContent = s.name;
-                sidePanel.style.display = isAll ? 'none' : 'block';
-                document.querySelector('#mainContent main').style.display = isAll ? 'none' : 'block';
-                document.getElementById('allSchoolsMessage').style.display = isAll ? 'block' : 'none';
-                classroomSelector.style.display = isAll ? 'none' : 'flex';
-                renderSchoolTabs(); switchSemester(currentSemesterId);
-            }
-
-            function switchSemester(id) { currentSemesterId = id; semesterSelector.querySelectorAll('.semester-btn').forEach(b => b.classList.toggle('active', b.dataset.id === id)); loadSchedule(id); }
-
-            function loadSchedule(sId) {
-                timetable.querySelectorAll('.class-item').forEach(el => el.remove());
-                const s = getCurrentSchool(); if (!s) return;
-                const targetRooms = currentClassroomId === 'all' ? ['classroom1', 'classroom2', 'classroom3'] : [currentClassroomId];
-                targetRooms.forEach(rId => {
-                    (s.schedules[rId][sId] || []).forEach(c => {
-                        const slot = timetable.querySelector(`[data-day="${c.day}"][data-time="${c.time}"]`);
-                        if (slot) slot.appendChild(createClassElement(c, currentClassroomId !== 'all'));
+        function generateGrid() {
+            timetable.innerHTML = '<div id="timetable-corner" class="sticky left-0 z-30 bg-white"></div>';
+            days.forEach(d => timetable.insertAdjacentHTML('beforeend', `<div class="day-header sticky z-20 bg-slate-100 p-2 text-center font-bold hour-separator">${d}</div>`));
+            for (let h = 8; h < 21; h++) {
+                for (let m = 0; m < 60; m += 10) {
+                    const t = `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}`;
+                    timetable.insertAdjacentHTML('beforeend', `<div class="time-label sticky left-0 bg-white pr-2 text-xs text-slate-500 z-20 ${m===0?'hour-separator':''}">${m===0?h+':00':''}</div>`);
+                    days.forEach(d => {
+                        const slot = document.createElement('div'); slot.className = `time-slot relative ${m===0?'hour-separator':''}`; slot.dataset.day = d; slot.dataset.time = t;
+                        slot.ondragover = (e) => { e.preventDefault(); slot.classList.add('drag-over'); };
+                        slot.ondragleave = () => slot.classList.remove('drag-over'); slot.ondrop = handleDrop; timetable.appendChild(slot);
                     });
-                });
-                updateDashboard();
-            }
-
-            function createClassElement(data, active = true) {
-                const info = courseInfo[data.course];
-                const el = document.createElement('div'); el.className = `class-item w-full p-2 rounded-lg border-l-4 text-xs ${info.style} flex flex-col justify-between ${!active ? 'class-item-inactive' : ''}`;
-                el.style.height = `${(info.duration / 10) * 20}px`; el.dataset.id = data.id;
-                const [sh, sm] = data.time.split(':').map(Number), et = sh * 60 + sm + info.duration;
-                el.innerHTML = `<div><div class="course-name font-bold">${data.course}</div><div class="text-xs">${data.time}-${Math.floor(et/60).toString().padStart(2,'0')}:${(et%60).toString().padStart(2,'0')}</div></div><div class="flex justify-between items-center"><div class="font-semibold">(${data.students}/${data.capacity})</div><div class="timing-indicator ${data.promotionTiming==='4月'?'timing-april':'timing-october'}">${data.promotionTiming==='4月'?'④':'⑩'}</div></div>${active?'<div class="delete-btn">×</div>':''}`;
-                if (active) {
-                    el.draggable = true; el.onclick = () => openDetailModal(data.id);
-                    el.querySelector('.delete-btn').onclick = (e) => { e.stopPropagation(); const sc = getClassroomSchedules(currentClassroomId)[currentSemesterId]; const idx = sc.findIndex(c => c.id === data.id); if(idx>-1) { sc.splice(idx,1); saveData(); loadSchedule(currentSemesterId); } };
-                    el.ondragstart = (e) => { window.draggedItem = e.target; window.dragType = 'move'; };
-                }
-                return el;
-            }
-
-            function generateTimetableGrid() {
-                timetable.innerHTML = '<div id="timetable-corner" class="sticky left-0 z-30 bg-white"></div>';
-                days.forEach(d => timetable.insertAdjacentHTML('beforeend', `<div class="day-header sticky z-20 bg-slate-100 p-2 text-center font-bold hour-separator">${d}</div>`));
-                for (let h = timeRange.start; h < timeRange.end; h++) {
-                    for (let m = 0; m < 60; m += timeRange.interval) {
-                        const t = `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}`;
-                        timetable.insertAdjacentHTML('beforeend', `<div class="time-label sticky left-0 bg-white pr-2 text-xs text-slate-500 z-20 ${m===0?'hour-separator':''}">${m===0?h+':00':''}</div>`);
-                        days.forEach(d => {
-                            const slot = document.createElement('div'); slot.className = `time-slot relative ${m===0?'hour-separator':''}`; slot.dataset.day = d; slot.dataset.time = t;
-                            slot.ondragover = (e) => { e.preventDefault(); slot.classList.add('drag-over'); };
-                            slot.ondragleave = () => slot.classList.remove('drag-over');
-                            slot.ondrop = handleDrop; timetable.appendChild(slot);
-                        });
-                    }
                 }
             }
+        }
 
-            function handleDrop(e) {
-                e.preventDefault(); const slot = e.currentTarget; slot.classList.remove('drag-over');
-                if (!window.draggedItem || currentClassroomId === 'all') return;
-                const crId = currentClassroomId, sId = currentSemesterId, course = window.draggedItem.dataset.course, dur = courseInfo[course].duration;
-                if (isSlotOccupied(slot.dataset.day, slot.dataset.time, dur, crId, window.dragType === 'move' ? window.draggedItem.dataset.id : null)) return;
-                const sc = getClassroomSchedules(crId); sc[sId] = sc[sId] || [];
-                if (window.dragType === 'move') {
-                    const c = sc[sId].find(x => x.id === window.draggedItem.dataset.id);
-                    if (c) { c.day = slot.dataset.day; c.time = slot.dataset.time; }
-                } else {
-                    sc[sId].push({ id: crypto.randomUUID(), course, day: slot.dataset.day, time: slot.dataset.time, capacity: 8, students: 0, promotionTiming: '4月', classroomId: crId });
-                }
-                saveData(); loadSchedule(sId);
-            }
+        function openDetailModal(id) {
+            editingClassId = id; const s = appData.schools.find(x => x.id === appData.currentSchoolId);
+            const c = s.schedules[currentClassroomId][currentSemesterId].find(x => x.id === id);
+            if (!c) return; document.getElementById('daySelect').value = c.day; document.getElementById('capacityInput').value = c.capacity;
+            document.querySelector(`input[name="classroom"][value="${c.classroomId}"]`).checked = true;
+            document.getElementById('detailModal').classList.remove('hidden');
+        }
 
-            function isSlotOccupied(day, time, dur, crId, exId) {
-                const s = getCurrentSchool(); if (!s) return true;
-                const [h, m] = time.split(':').map(Number), start = h * 60 + m, end = start + dur;
-                const sched = (s.schedules[crId] || {})[currentSemesterId] || [];
-                return sched.some(c => c.id !== exId && c.day === day && (() => { const [hB, mB] = c.time.split(':').map(Number), sB = hB * 60 + mB, eB = sB + courseInfo[c.course].duration; return start < eB && end > sB; })());
-            }
+        document.getElementById('saveBtn').onclick = () => {
+            const s = appData.schools.find(x => x.id === appData.currentSchoolId);
+            const sc = s.schedules[currentClassroomId][currentSemesterId];
+            const idx = sc.findIndex(x => x.id === editingClassId), c = sc[idx];
+            const nr = document.querySelector('input[name="classroom"]:checked').value;
+            if (nr !== currentClassroomId) {
+                const [rem] = sc.splice(idx, 1); rem.classroomId = nr; s.schedules[nr][currentSemesterId].push(rem);
+            } else { c.capacity = parseInt(document.getElementById('capacityInput').value); }
+            saveData(); document.getElementById('detailModal').classList.add('hidden'); loadSchedule();
+        };
 
-            function openDetailModal(id) {
-                editingClassId = id; const c = getClassroomSchedules(currentClassroomId)[currentSemesterId].find(x => x.id === id);
-                if (!c) return; modalTitle.textContent = `${c.course} 設定`;
-                daySelect.value = c.day; timeSelect.value = c.time;
-                document.querySelector(`input[name="classroom"][value="${c.classroomId}"]`).checked = true;
-                capacityInput.value = c.capacity; studentsInput.value = c.students;
-                document.querySelector(`input[name="promotionTiming"][value="${c.promotionTiming}"]`).checked = true;
-                detailModal.classList.remove('hidden');
-            }
+        document.getElementById('closeBtn').onclick = () => document.getElementById('detailModal').classList.add('hidden');
+        classroomSelector.querySelectorAll('.classroom-tab').forEach(b => b.onclick = () => { currentClassroomId = b.dataset.id; loadSchedule(); });
+        semesters.forEach(s => { const b = document.createElement('button'); b.className = 'semester-btn w-full p-2 bg-slate-100 rounded text-xs'; b.textContent = s.name; b.dataset.id = s.id; b.onclick = () => switchSemester(s.id); document.getElementById('semesterSelector').appendChild(b); });
+        Object.keys(courseInfo).forEach(c => { const el = document.createElement('div'); el.className = `p-3 rounded-lg border-l-4 text-sm ${courseInfo[c].style}`; el.textContent = c; el.draggable = true; el.dataset.course = c; el.ondragstart = (e) => { window.draggedItem = e.target; window.dragType = 'new'; }; document.getElementById('classBank').appendChild(el); });
 
-            saveBtn.onclick = () => {
-                const sc = getClassroomSchedules(currentClassroomId)[currentSemesterId];
-                const idx = sc.findIndex(x => x.id === editingClassId), c = sc[idx];
-                const nextRoom = document.querySelector('input[name="classroom"]:checked').value;
-                if (nextRoom !== currentClassroomId) {
-                    if (isSlotOccupied(daySelect.value, timeSelect.value, courseInfo[c.course].duration, nextRoom, null)) { alert('移動先が埋まっています'); return; }
-                    const [removed] = sc.splice(idx, 1); removed.classroomId = nextRoom;
-                    const target = getClassroomSchedules(nextRoom); target[currentSemesterId] = target[currentSemesterId] || [];
-                    target[currentSemesterId].push(removed);
-                } else {
-                    c.day = daySelect.value; c.time = timeSelect.value; c.capacity = parseInt(capacityInput.value); c.students = parseInt(studentsInput.value); c.promotionTiming = document.querySelector('input[name="promotionTiming"]:checked').value;
-                }
-                saveData(); detailModal.classList.add('hidden'); loadSchedule(currentSemesterId);
-            };
-
-            function updateDashboard() {
-                const s = getCurrentSchool(); if (!s) return;
-                let all = [];
-                if (appData.currentSchoolId === ALL_SCHOOLS_ID) {
-                    appData.schools.filter(x => x.id !== ALL_SCHOOLS_ID).forEach(sch => { ['classroom1','classroom2','classroom3'].forEach(r => all = all.concat(sch.schedules[r][currentSemesterId] || [])); });
-                } else {
-                    const rooms = currentClassroomId === 'all' ? ['classroom1','classroom2','classroom3'] : [currentClassroomId];
-                    rooms.forEach(r => all = all.concat(s.schedules[r][currentSemesterId] || []));
-                }
-                totalStudentsEl.textContent = all.reduce((a,b) => a + (b.students || 0), 0);
-                totalClassesEl.textContent = all.length;
-                const cap = all.reduce((a,b) => a + (b.capacity || 0), 0);
-                totalAvailableEl.textContent = Math.max(0, cap - parseInt(totalStudentsEl.textContent));
-                dashboardContainer.innerHTML = '';
-                Object.keys(courseInfo).forEach(c => {
-                    const list = all.filter(x => x.course === c);
-                    if (list.length > 0) {
-                        const st = list.reduce((a,b) => a + (b.students || 0), 0), cp = list.reduce((a,b) => a + (b.capacity || 0), 0);
-                        dashboardContainer.insertAdjacentHTML('beforeend', `<div class="grid grid-cols-12 gap-4 items-center text-sm"><div class="col-span-3 font-semibold">${c}</div><div class="col-span-6 bg-slate-200 rounded-full h-4"><div class="${courseInfo[c].style} h-4 rounded-full" style="width:${(st/cp)*100}%"></div></div><div class="col-span-3 text-right">${st}/${cp}人</div></div>`);
-                    }
-                });
-            }
-
-            // 初期化
-            semesters.forEach(s => {
-                const b = document.createElement('button'); b.className = 'semester-btn w-full p-2 bg-slate-100 rounded text-xs font-semibold';
-                b.textContent = s.name; b.dataset.id = s.id; b.onclick = () => switchSemester(s.id); semesterSelector.appendChild(b);
-            });
-            days.forEach(d => daySelect.add(new Option(d, d)));
-            for(let h=timeRange.start; h<timeRange.end; h++) for(let m=0; m<60; m+=10) { const t=`${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}`; timeSelect.add(new Option(t, t)); }
-            Object.keys(courseInfo).forEach(c => {
-                const el = document.createElement('div'); el.className = `class-item-in-bank p-3 rounded-lg border-l-4 font-semibold text-sm ${courseInfo[c].style}`;
-                el.textContent = c; el.draggable = true; el.dataset.course = c;
-                el.ondragstart = (e) => { window.draggedItem = e.target; window.dragType = 'new'; }; classBank.appendChild(el);
-            });
-            classroomSelector.querySelectorAll('.classroom-tab').forEach(b => b.onclick = () => {
-                currentClassroomId = b.dataset.id; classroomSelector.querySelectorAll('.classroom-tab').forEach(x => x.classList.toggle('active', x.dataset.id === b.dataset.id)); loadSchedule(currentSemesterId);
-            });
-            closeBtn.onclick = () => detailModal.classList.add('hidden');
-            generateTimetableGrid(); initFirebase();
-        });
+        generateGrid(); initFirebase();
     </script>
 </body>
 </html>
